@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+venv/
+env/
+*.docx
+StudentNumber-Nithin-Surname IPR (1)_BACKUP.docx
+figure_*.png
+screen_*.png
+test_*.py
+capture_and_update_screenshots.py
+build_full_ipr_doc.py

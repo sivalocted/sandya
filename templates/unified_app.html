@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Living Assistant - Complete Unified Application</title>
+    <style>
+        :root {
+            --frame-border: #1B2A38;
+            --text-dark: #1A202C;
+            --text-muted: #64748B;
+            --blue-accent: #2563EB;
+            --blue-border: #3182CE;
+            --blue-bg: #F0F7FF;
+            --green-done: #1B7A3E;
+            --green-done-hover: #166534;
+            --border-gray: #CBD5E0;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #F1F5F9;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 20px 40px 20px;
+        }
+
+        /* Top Simulation Bar */
+        .demo-bar {
+            width: 100%;
+            max-width: 1320px;
+            background: #0F172A;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        }
+        .demo-bar-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .demo-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-demo {
+            background: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            padding: 7px 15px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-demo:hover { background: #1D4ED8; transform: translateY(-1px); }
+        .btn-demo-orange { background: #F59E0B; }
+        .btn-demo-orange:hover { background: #D97706; }
+        .btn-demo-red { background: #EF4444; }
+        .btn-demo-red:hover { background: #DC2626; }
+
+        /* Unified App Header & Tab Switcher */
+        .app-header {
+            width: 100%;
+            max-width: 1320px;
+            background: #FFFFFF;
+            padding: 14px 24px;
+            border-radius: 16px;
+            border: 2px solid var(--border-gray);
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .app-title-group h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0D47A1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .view-tabs {
+            display: flex;
+            background: #F1F5F9;
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .tab-btn.active {
+            background: #FFFFFF;
+            color: #0D47A1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        /* Main Workspace Container */
+        .workspace {
+            width: 100%;
+            max-width: 1320px;
+        }
+
+        /* 1. LIVE STUDIO VIEW (ALL 3 INTEGRATED SIDE-BY-SIDE) */
+        .studio-layout {
+            display: grid;
+            grid-template-columns: 370px 1fr;
+            gap: 32px;
+            align-items: flex-start;
+        }
+        @media (max-width: 1024px) {
+            .studio-layout {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+        }
+
+        /* Tablet Frame (Exact Design from Figure A2.1) */
+        .tablet-device {
+            width: 370px;
+            height: 650px;
+            background-color: #FFFFFF;
+            border: 4px solid var(--frame-border);
+            border-radius: 38px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .device-badge {
+            position: absolute;
+            top: 10px;
+            right: 18px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: #E2E8F0;
+            color: #475569;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Screen A: Home Screen Inside Tablet */
+        #view-screen-a {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            transition: opacity 0.25s ease;
+        }
+
+        .home-top {
+            text-align: center;
+            margin-top: 4px;
+        }
+        .home-day {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 2px;
+        }
+        .home-date {
+            font-size: 1.25rem;
+            color: #2D3748;
+            margin-bottom: 6px;
+        }
+        .home-clock {
+            font-size: 4.6rem;
+            font-weight: 800;
+            color: #1B2A38;
+            line-height: 1;
+            margin: 4px 0;
+            letter-spacing: -1.5px;
+        }
+        .home-part {
+            font-size: 1.25rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .home-next-box {
+            background-color: #F0F7FF;
+            border: 3px solid #3182CE;
+            border-radius: 18px;
+            padding: 18px 16px;
+            text-align: center;
+            margin: 18px 0;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .home-next-box:hover {
+            transform: scale(1.02);
+            background-color: #E6F2FF;
+        }
+        .home-next-label {
+            font-size: 1.05rem;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+        .home-next-task {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #1A202C;
+        }
+
+        .home-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .home-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .home-btn {
+            background-color: #FFFFFF;
+            border: 3px solid #1B2A38;
+            border-radius: 18px;
+            padding: 14px 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1A202C;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 58px;
+            transition: all 0.12s ease;
+        }
+        .home-btn:hover {
+            background-color: #F8FAFC;
+        }
+        .home-btn-full {
+            width: 100%;
+        }
+
+        /* Screen B: Reminder Prompt Inside Tablet */
+        #view-screen-b {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            transition: opacity 0.25s ease;
+        }
+
+        .prompt-top-time {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #718096;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        .prompt-center {
+            text-align: center;
+            margin: auto 0;
+        }
+        .prompt-lead {
+            font-size: 1.7rem;
+            color: #2D3748;
+            margin-bottom: 6px;
+        }
+        .prompt-main-task {
+            font-size: 2.85rem;
+            font-weight: 800;
+            color: #1A202C;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        .prompt-spoken-note {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #718096;
+            cursor: pointer;
+        }
+        .prompt-spoken-note:hover {
+            color: #2563EB;
+            text-decoration: underline;
+        }
+
+        .prompt-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+        .btn-prompt-done {
+            background-color: #1B7A3E;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 18px;
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 16px;
+            width: 100%;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(27, 122, 62, 0.3);
+            cursor: pointer;
+        }
+        .btn-prompt-done:hover {
+            background-color: #166534;
+        }
+        .btn-prompt-snooze {
+            background-color: #FFFFFF;
+            color: #1A202C;
+            border: 3px solid #1B2A38;
+            border-radius: 18px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 14px;
+            width: 100%;
+            min-height: 68px;
+            line-height: 1.25;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-prompt-snooze:hover {
+            background-color: #F8FAFC;
+        }
+        .prompt-footer-note {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        /* Screen C & Dashboard Integration on Right Side */
+        .caregiver-console {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* KPI Banner */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+        .kpi-card {
+            background: #FFFFFF;
+            border: 2px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .kpi-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+        }
+        .kpi-val {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin: 4px 0 2px 0;
+        }
+        .kpi-desc {
+            font-size: 0.8rem;
+            color: #94A3B8;
+        }
+
+        /* Caregiver Setup Card */
+        .card {
+            background: #FFFFFF;
+            border: 2px solid var(--border-gray);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .card-header h2 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1A202C;
+        }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.95rem;
+            color: #64748B;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-input {
+            width: 100%;
+            border: 2px solid #CBD5E0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 1.05rem;
+            color: #1A202C;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .form-input:focus {
+            border-color: #2563EB;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 14px 0 18px 0;
+            cursor: pointer;
+        }
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background-color: #2563EB;
+            border-radius: 13px;
+            position: relative;
+            flex-shrink: 0;
+            transition: background-color 0.15s ease;
+        }
+        .toggle-knob {
+            width: 20px;
+            height: 20px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            transition: all 0.15s ease;
+        }
+        .toggle-label {
+            font-size: 0.92rem;
+            color: #2D3748;
+            line-height: 1.3;
+        }
+
+        .btn-save-routine {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 12px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: background 0.15s ease;
+        }
+        .btn-save-routine:hover {
+            background-color: #1D4ED8;
+        }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.93rem;
+        }
+        .data-table th, .data-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .data-table th {
+            background: #F8FAFC;
+            font-weight: 700;
+            color: #475569;
+        }
+        .badge-optin {
+            background: #DBEAFE;
+            color: #1E40AF;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #FEF2F2;
+            border: 2px solid #EF4444;
+            border-radius: 16px;
+            padding: 16px 20px;
+            color: #991B1B;
+            display: none;
+        }
+
+        /* Success Done Overlay */
+        .done-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(27, 122, 62, 0.96);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 34px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        /* Modal Dialogs */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 460px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1B7A3E;
+            color: #FFFFFF;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: none;
+        }
+    </style>
+    <script>
+        // Web Audio Synthesizer
+        function playChime(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'done') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.4);
+                    });
+                } else if (type === 'snooze') {
+                    [440, 392].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.15);
+                        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.15);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.15 + 0.35);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.15);
+                        osc.stop(ctx.currentTime + idx * 0.15 + 0.35);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // Web Speech API
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.9;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function showToast(msg, bg) {
+            const toast = document.getElementById('app-toast');
+            if (toast) {
+                toast.innerText = msg;
+                toast.style.background = bg || '#1B7A3E';
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3500);
+            }
+        }
+
+        // Clock Ticking
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const clockEl = document.getElementById('clock-display');
+            if (clockEl) clockEl.innerText = h + ':' + m;
+        }
+        setInterval(updateClock, 1000);
+
+        // Core State Transitions: Home (A) <-> Prompt (B)
+        let activeOccId = {% if active_occ %}{{ active_occ.occ_id }}{% else %}999{% endif %};
+        let activeTaskLabel = "{% if active_occ %}{{ active_occ.task.label }}{% else %}{{ next_task_label|default('Have your lunch') }}{% endif %}";
+        let activeTaskTime = "{% if active_occ %}{{ active_occ.task.time_of_day }}{% else %}{{ current_time|default('12:30') }}{% endif %}";
+        let snoozeCount = {% if active_occ %}{{ active_occ.snoozes }}{% else %}0{% endif %};
+
+        {% if active_occ %}
+        window.addEventListener('DOMContentLoaded', () => {
+            showPromptScreen(activeTaskLabel, activeTaskTime, activeOccId);
+        });
+        {% endif %}
+
+        function showPromptScreen(label, timeStr, occId) {
+            activeTaskLabel = label || activeTaskLabel;
+            activeTaskTime = timeStr || activeTaskTime;
+            activeOccId = occId || activeOccId;
+
+            document.getElementById('prompt-task-text').innerText = activeTaskLabel;
+            document.getElementById('prompt-time-text').innerText = activeTaskTime;
+
+            document.getElementById('view-screen-a').style.display = 'none';
+            document.getElementById('view-screen-b').style.display = 'flex';
+            document.getElementById('tablet-badge').innerText = 'B. PROMPT';
+            document.getElementById('tablet-badge').style.background = '#DCFCE7';
+            document.getElementById('tablet-badge').style.color = '#15803D';
+
+            // Speak on prompt arrival
+            speakText("Time for " + activeTaskLabel + ". Please tap the big green Done button when you are finished.");
+        }
+
+        function showHomeScreen() {
+            document.getElementById('view-screen-b').style.display = 'none';
+            document.getElementById('view-screen-a').style.display = 'flex';
+            document.getElementById('tablet-badge').innerText = 'A. HOME';
+            document.getElementById('tablet-badge').style.background = '#E2E8F0';
+            document.getElementById('tablet-badge').style.color = '#475569';
+        }
+
+        // Patient Actions
+        function patientConfirmDone() {
+            playChime('done');
+            speakText("Well done! " + activeTaskLabel + " completed.");
+            document.getElementById('done-overlay').style.display = 'flex';
+            showToast("✓ DONE: " + activeTaskLabel + " completed!", "#1B7A3E");
+
+            // Post to backend
+            fetch('/api/confirm/' + activeOccId, { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => r.json())
+                .then(() => {
+                    setTimeout(() => {
+                        document.getElementById('done-overlay').style.display = 'none';
+                        showHomeScreen();
+                        reloadEventLogs();
+                        reloadCompletionRate();
+                    }, 1800);
+                });
+        }
+
+        function patientSnooze() {
+            playChime('snooze');
+            snoozeCount++;
+
+            if (snoozeCount <= 2) {
+                speakText("Reminder snoozed for 10 minutes.");
+                showToast("⏰ Snoozed for 10 minutes (" + snoozeCount + "/2)", "#F59E0B");
+
+                fetch('/api/snooze/' + activeOccId, { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                    .then(() => {
+                        setTimeout(() => {
+                            showHomeScreen();
+                            reloadEventLogs();
+                        }, 1200);
+                    });
+            } else {
+                speakText("Snooze limit reached. Please tap Done.");
+                showToast("🚫 Snooze limit reached (2/2)", "#EF4444");
+                document.getElementById('btn-snooze-action').style.opacity = '0.5';
+                document.getElementById('btn-snooze-action').style.cursor = 'not-allowed';
+            }
+        }
+
+        function speakHomeOrientation() {
+            const clockText = document.getElementById('clock-display').innerText;
+            const text = "Today is Monday, 16 November 2026. The time is " + clockText + ", Afternoon. Up next: " + activeTaskLabel + ".";
+            speakText(text);
+            showToast("🔊 Reading orientation aloud...", "#2563EB");
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function triggerCall(name, number) {
+            speakText("Calling " + name + " now.");
+            showToast("📞 Calling " + name + " (" + number + ")...", "#1B7A3E");
+            setTimeout(() => { closeModal('modal-call'); }, 1800);
+        }
+
+        // Caregiver Actions
+        function toggleCaregiverOptin() {
+            const sw = document.getElementById('switch-optin');
+            const inp = document.getElementById('optin-input');
+            if (inp.value === '1') {
+                inp.value = '0';
+                sw.style.backgroundColor = '#CBD5E0';
+                sw.querySelector('.toggle-knob').style.right = 'auto';
+                sw.querySelector('.toggle-knob').style.left = '3px';
+                showToast("Caregiver escalation turned OFF", "#64748B");
+            } else {
+                inp.value = '1';
+                sw.style.backgroundColor = '#2563EB';
+                sw.querySelector('.toggle-knob').style.left = 'auto';
+                sw.querySelector('.toggle-knob').style.right = '3px';
+                showToast("Caregiver escalation opt-in ENABLED", "#2563EB");
+            }
+        }
+
+        function saveCaregiverRoutine(event) {
+            event.preventDefault();
+            const label = document.getElementById('cfg-label').value;
+            const timeVal = document.getElementById('cfg-time').value;
+            const daysVal = document.getElementById('cfg-days').value;
+            const optin = document.getElementById('optin-input').value;
+
+            const formData = new FormData();
+            formData.append('label', label);
+            formData.append('time_of_day', timeVal);
+            formData.append('days', daysVal);
+            formData.append('alert_caregiver', optin);
+
+            fetch('/caregiver/tasks/add', { method: 'POST', body: formData })
+                .then(() => {
+                    playChime('done');
+                    showToast("💾 Routine '" + label + "' scheduled at " + timeVal + "!", "#2563EB");
+                    speakText("Routine saved: " + label + " at " + timeVal);
+                    // Update Next task on patient display
+                    activeTaskLabel = label;
+                    activeTaskTime = timeVal;
+                    document.getElementById('next-task-text').innerText = label;
+                    reloadEventLogs();
+                });
+        }
+
+        function triggerSimulationPrompt() {
+            fetch('/api/trigger-test-prompt', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => r.json())
+                .then(d => {
+                    showToast("🔔 Active Reminder Triggered!", "#2563EB");
+                    showPromptScreen(d.label, "12:30", d.occ_id);
+                    reloadEventLogs();
+                });
+        }
+
+        function simulateMissedOccurrence() {
+            fetch('/api/simulate-miss', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => r.json())
+                .then(d => {
+                    showToast(d.message, d.streak >= 2 ? '#DC2626' : '#D97706');
+                    speakText(d.message);
+                    if (d.streak >= 2) {
+                        const alertBox = document.getElementById('caregiver-alert-box');
+                        alertBox.style.display = 'block';
+                        alertBox.innerHTML = "<h3>⚠️ Urgent Caregiver Escalation (Rule 5 Triggered)</h3><p>Consecutive misses reached threshold (" + d.streak + " misses). Notification dispatched to Sarah (Daughter).</p>";
+                    }
+                    reloadEventLogs();
+                    reloadCompletionRate();
+                });
+        }
+
+        function reloadEventLogs() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(d => {
+                    // Update completion rate
+                    document.getElementById('kpi-rate').innerText = d.completion_rate + '%';
+                });
+        }
+
+        function reloadCompletionRate() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('kpi-rate').innerText = d.completion_rate + '%';
+                });
+        }
+    </script>
+</head>
+<body>
+    <!-- Live Demo Toolbar -->
+    <div class="demo-bar">
+        <div class="demo-bar-title">
+            <span>⚡ Interactive Control Center:</span>
+        </div>
+        <div class="demo-actions">
+            <button class="btn-demo" onclick="triggerSimulationPrompt()">🔔 Trigger Reminder Now</button>
+            <button class="btn-demo btn-demo-orange" onclick="patientSnooze()">⏰ Test Snooze (10m)</button>
+            <button class="btn-demo" onclick="speakHomeOrientation()">🔊 Speak Orientation</button>
+            <button class="btn-demo btn-demo-red" onclick="simulateMissedOccurrence()">⚠️ Simulate Missed Task</button>
+            <button class="btn-demo" style="background:#475569;" onclick="location.reload();">🔄 Refresh State</button>
+        </div>
+    </div>
+
+    <!-- App Header -->
+    <div class="app-header">
+        <div class="app-title-group">
+            <h1>🧠 Daily Living Assistant</h1>
+            <div class="app-subtitle">A Caregiver-Configured Assistive System for Alzheimer's & Dementia (MSc Dissertation System)</div>
+        </div>
+        <div class="view-tabs">
+            <button class="tab-btn active" onclick="document.getElementById('studio-layout').style.display='grid'; this.classList.add('active');">
+                ⚡ Unified Studio View (All 3 in 1)
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN UNIFIED WORKSPACE -->
+    <div class="workspace">
+        <div class="studio-layout" id="studio-layout">
+            
+            <!-- LEFT COLUMN: THE REAL INTERACTIVE PATIENT TABLET -->
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div style="font-size:1.15rem; font-weight:800; color:#1E293B; margin-bottom:10px;">
+                    📱 Recipient Tablet Display (Patient Surface)
+                </div>
+
+                <div class="tablet-device">
+                    <div class="device-badge" id="tablet-badge">A. HOME</div>
+
+                    <!-- Celebration Done Overlay -->
+                    <div id="done-overlay" class="done-overlay">
+                        <div style="font-size:4.5rem; margin-bottom:12px;">✓</div>
+                        <div style="font-size:2rem; font-weight:800;">Well Done!</div>
+                        <p style="font-size:1.1rem; margin-top:8px;">Activity confirmed & logged.</p>
+                    </div>
+
+                    <!-- SCREEN A: HOME / ORIENTATION -->
+                    <div id="view-screen-a">
+                        <div class="home-top">
+                            <div class="home-day">{{ day_name|default('Monday') }}</div>
+                            <div class="home-date">{{ date_str|default('16 November 2026') }}</div>
+                            <div class="home-clock" id="clock-display">{{ current_time|default('12:30') }}</div>
+                            <div class="home-part">{{ part_of_day|default('Afternoon') }}</div>
+                        </div>
+
+                        <!-- Next Reminder Card -->
+                        <div class="home-next-box" onclick="triggerSimulationPrompt()" title="Click to trigger this reminder!">
+                            <div class="home-next-label">Next:</div>
+                            <div class="home-next-task" id="next-task-text">{{ next_task_label|default('Have your lunch') }}</div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="home-actions">
+                            <div class="home-row">
+                                <button type="button" class="home-btn" onclick="openModal('modal-schedule')">My day</button>
+                                <button type="button" class="home-btn" onclick="openModal('modal-call')">Call family</button>
+                            </div>
+                            <button type="button" class="home-btn home-btn-full" onclick="speakHomeOrientation()">
+                                Read aloud
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN B: REMINDER PROMPT (MORPHS RIGHT HERE INSIDE TABLET) -->
+                    <div id="view-screen-b">
+                        <div class="prompt-top-time" id="prompt-time-text">{% if active_occ %}{{ active_occ.task.time_of_day }}{% else %}12:30{% endif %}</div>
+
+                        <div class="prompt-center">
+                            <div class="prompt-lead">Time for</div>
+                            <div class="prompt-main-task" id="prompt-task-text">{% if active_occ %}{{ active_occ.task.label }}{% else %}Have your lunch{% endif %}</div>
+                            <div class="prompt-spoken-note" onclick="speakText('Time for ' + activeTaskLabel + '. Please tap the big green Done button when you are finished.')">
+                                🔊 (spoken aloud as well)
+                            </div>
+                        </div>
+
+                        <div class="prompt-actions">
+                            <button type="button" class="btn-prompt-done" onclick="patientConfirmDone()">
+                                DONE
+                            </button>
+                            <button type="button" class="btn-prompt-snooze" id="btn-snooze-action" onclick="patientSnooze()">
+                                Remind me<br>in 10 minutes
+                            </button>
+                            <div class="prompt-footer-note">
+                                Snooze hides after 2 uses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: CAREGIVER CONSOLE & AUDIT DATABASE -->
+            <div class="caregiver-console">
+                <!-- Top KPI Banner -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Completion Rate</div>
+                        <div class="kpi-val" id="kpi-rate" style="color: #1B7A3E;">{{ completion_rate }}%</div>
+                        <div class="kpi-desc">SQLite SQL formula (IPR §7)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Active Routines</div>
+                        <div class="kpi-val" style="color: #2563EB;">{{ tasks|length }}</div>
+                        <div class="kpi-desc">Configured daily tasks</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Recipient</div>
+                        <div class="kpi-val" style="font-size: 1.6rem; color: #1E293B;">John</div>
+                        <div class="kpi-desc">Caregiver: Sarah</div>
+                    </div>
+                </div>
+
+                <!-- Alert Banner -->
+                <div class="alert-banner" id="caregiver-alert-box">
+                    {% if alerts %}
+                    <h3>⚠️ Urgent Caregiver Escalation Active</h3>
+                    {% for a in alerts %}
+                    <p><strong>{{ a.timestamp.strftime('%H:%M:%S') }}</strong>: {{ a.message }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Screen C: Caregiver Setup Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>C. Caregiver Setup — Schedule New Reminder</h2>
+                    </div>
+
+                    <form onsubmit="saveCaregiverRoutine(event)">
+                        <input type="hidden" id="optin-input" value="1">
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">What should it say?</label>
+                                <input type="text" id="cfg-label" class="form-input" value="Have your lunch" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Time (24h)</label>
+                                <input type="text" id="cfg-time" class="form-input" value="12:30" required>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Days Recurrence</label>
+                                <input type="text" id="cfg-days" class="form-input" value="Every day">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Snooze Settings</label>
+                                <input type="text" class="form-input" value="10 min, max 2 times" readonly style="background:#F8FAFC;">
+                            </div>
+                        </div>
+
+                        <div class="toggle-row" onclick="toggleCaregiverOptin()">
+                            <div class="toggle-switch" id="switch-optin">
+                                <div class="toggle-knob"></div>
+                            </div>
+                            <div class="toggle-label">
+                                <strong>Alert me if missed twice (Rule 5 opt-in)</strong><br>
+                                <span style="color:#64748B; font-size:0.85rem;">Sends family notification only after 2 consecutive unconfirmed tasks.</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-save-routine">
+                            Save & Update Schedule
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Audit Event Log (SQLite EVENT_LOG) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Auditable Event Log (SQLite `EVENT_LOG`)</h2>
+                        <span style="font-size:0.85rem; color:#64748B;">Live history of all interactions</span>
+                    </div>
+
+                    <div style="max-height: 220px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>System Event Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-table-body">
+                                {% for log in event_logs %}
+                                <tr>
+                                    <td style="color:#64748B; font-family:monospace; font-size:0.85rem;">{{ log.timestamp }}</td>
+                                    <td><strong>{{ log.action }}</strong></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="2" style="text-align:center; color:#999; padding:12px;">No events recorded yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: My Day Schedule -->
+    <div id="modal-schedule" class="modal-overlay" onclick="if(event.target === this) closeModal('modal-schedule');">
+        <div class="modal-card">
+            <h2 style="font-size:1.8rem; margin-bottom:16px;">📅 Today's Schedule</h2>
+            <div style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+                {% for item in day_schedule %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #E2E8F0; text-align:left;">
+                    <div><strong>{{ item.time }}</strong> — {{ item.label }}</div>
+                    <div>
+                        {% if item.status == 'done' %}
+                        <span style="background:#E8F5E9; color:#2E7D32; padding:3px 8px; border-radius:6px; font-weight:bold; font-size:0.85rem;">✓ Done</span>
+                        {% else %}
+                        <span style="background:#E3F2FD; color:#1565C0; padding:3px 8px; border-radius:6px; font-weight:bold; font-size:0.85rem;">⏳ Scheduled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="btn-demo" style="width:100%; justify-content:center; padding:12px; font-size:1.05rem;" onclick="closeModal('modal-schedule')">
+                Close Schedule
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Call Family -->
+    <div id="modal-call" class="modal-overlay" onclick="if(event.target === this) closeModal('modal-call');">
+        <div class="modal-card">
+            <h2 style="font-size:1.8rem; margin-bottom:16px;">📞 Who would you like to call?</h2>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+                <button type="button" class="btn-demo" style="background:#2E7D32; font-size:1.25rem; padding:16px; border-radius:14px; justify-content:center;" onclick="triggerCall('Sarah (Daughter)', '07123 456789')">
+                    📞 Call Sarah (Daughter)
+                </button>
+                <button type="button" class="btn-demo" style="background:#1565C0; font-size:1.25rem; padding:16px; border-radius:14px; justify-content:center;" onclick="triggerCall('Dr. Evans (GP)', '01234 567890')">
+                    📞 Call Dr. Evans (GP)
+                </button>
+            </div>
+            <button class="btn-demo" style="background:#94A3B8; width:100%; justify-content:center; padding:10px;" onclick="closeModal('modal-call')">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <div id="app-toast" class="toast"></div>
+</body>
+</html>

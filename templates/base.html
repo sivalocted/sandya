@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Daily Living Assistant{% endblock %}</title>
+    <style>
+        :root {
+            --frame-border: #1B2A38;
+            --text-dark: #1A202C;
+            --text-muted: #718096;
+            --blue-accent: #2563EB;
+            --blue-border: #3182CE;
+            --blue-bg: #F0F7FF;
+            --green-done: #1B7A3E;
+            --green-done-hover: #166534;
+            --border-gray: #CBD5E0;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #F0F4F8;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+
+        /* Top Simulation Bar */
+        .demo-bar {
+            width: 100%;
+            max-width: 1180px;
+            background: #1E293B;
+            color: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .demo-bar-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .demo-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-demo {
+            background: #3B82F6;
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .btn-demo:hover { background: #2563EB; }
+        .btn-demo-orange { background: #F59E0B; }
+        .btn-demo-orange:hover { background: #D97706; }
+        .btn-demo-red { background: #EF4444; }
+        .btn-demo-red:hover { background: #DC2626; }
+
+        /* Main Navigation */
+        .nav-bar {
+            width: 100%;
+            max-width: 1180px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 14px;
+            border: 2px solid var(--border-gray);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nav-links a {
+            color: #2D3748;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.98rem;
+            margin-left: 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: #EBF8FF;
+            color: var(--blue-accent);
+        }
+
+        /* Tablet Frame from Figure A2.1 */
+        .tablet-frame {
+            width: 360px;
+            height: 640px;
+            background-color: #FFFFFF;
+            border: 4px solid var(--frame-border);
+            border-radius: 36px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .screen-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        /* Interactive Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .modal-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            color: #1A202C;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1B7A3E;
+            color: #FFFFFF;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: none;
+        }
+
+        button, .btn {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.08s ease, background-color 0.15s ease;
+        }
+        button:active, .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <script>
+        // Web Audio API Synthesizer - Plays clean chime tones
+        function playChime(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'done') {
+                    // Ascending major chord chime (C5 -> E5 -> G5 -> C6)
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.4);
+                    });
+                } else if (type === 'snooze') {
+                    // Gentle descending 2-tone
+                    [440, 392].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.15);
+                        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.15);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.15 + 0.35);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.15);
+                        osc.stop(ctx.currentTime + idx * 0.15 + 0.35);
+                    });
+                }
+            } catch (e) {
+                console.log("AudioContext not allowed or supported:", e);
+            }
+        }
+
+        // Web Speech API - Text-to-Speech
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.9;
+                utter.pitch = 1.0;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function showToast(msg, bg) {
+            const toast = document.getElementById('app-toast');
+            if (toast) {
+                toast.innerText = msg;
+                toast.style.background = bg || '#1B7A3E';
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3500);
+            }
+        }
+
+        // Simulation Trigger Functions
+        function triggerPromptNow() {
+            fetch('/api/trigger-test-prompt', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => r.json())
+                .then(data => {
+                    showToast("🔔 Active Reminder Triggered!", "#2563EB");
+                    setTimeout(() => {
+                        window.location.href = '/prompt/' + data.occ_id;
+                    }, 500);
+                });
+        }
+
+        function simulateMissedTask() {
+            fetch('/api/simulate-miss', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => r.json())
+                .then(data => {
+                    showToast(data.message, data.streak >= 2 ? '#DC2626' : '#D97706');
+                    speakText(data.message);
+                });
+        }
+    </script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Live Demo Toolbar -->
+    <div class="demo-bar">
+        <div class="demo-bar-title">
+            <span>⚡ Interactive Control Panel:</span>
+        </div>
+        <div class="demo-actions">
+            <button class="btn-demo" onclick="triggerPromptNow()">🔔 Trigger Reminder Now</button>
+            <button class="btn-demo btn-demo-orange" onclick="speakText('Testing speech synthesis. The daily living assistant is active.');">🔊 Test Voice Speech</button>
+            <button class="btn-demo btn-demo-red" onclick="simulateMissedTask()">⚠️ Simulate Missed Task</button>
+            <a href="{{ url_for('all_screens') }}" class="btn-demo" style="text-decoration:none; display:inline-flex; align-items:center;">📱 3-Screen View</a>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <div class="nav-bar">
+        <div style="font-weight: 800; font-size: 1.15rem; color: #0D47A1;">
+            🧠 Daily Living Assistant <span style="font-size: 0.85rem; font-weight: normal; color: #666;">(MSc Project Prototype)</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('all_screens') }}" class="{% if request.endpoint == 'all_screens' %}active{% endif %}">📱 All 3 Screens (Design)</a>
+            <a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">A. Home Screen</a>
+            <a href="{{ url_for('prompt') }}" class="{% if request.endpoint == 'prompt' %}active{% endif %}">B. Reminder Prompt</a>
+            <a href="{{ url_for('caregiver_portal') }}" class="{% if request.endpoint == 'caregiver_portal' %}active{% endif %}">C. Caregiver Portal</a>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <div id="app-toast" class="toast"></div>
+</body>
+</html>

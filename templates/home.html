@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}A. Home Screen - Daily Living Assistant{% endblock %}
+
+{% block extra_head %}
+<script>
+    // Live Clock Ticking Every Second
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const clockEl = document.getElementById('live-clock');
+        if (clockEl) {
+            clockEl.innerText = hours + ':' + minutes;
+        }
+
+        // Live Part of Day
+        let part = 'Morning';
+        const h = now.getHours();
+        if (h >= 12 && h < 17) part = 'Afternoon';
+        else if (h >= 17 && h < 21) part = 'Evening';
+        else if (h >= 21 || h < 5) part = 'Night';
+        const partEl = document.getElementById('live-part');
+        if (partEl) {
+            partEl.innerText = part;
+        }
+    }
+    setInterval(updateClock, 1000);
+
+    // Speak Home Screen Aloud
+    function speakHome() {
+        const clockEl = document.getElementById('live-clock');
+        const timeStr = clockEl ? clockEl.innerText : "{{ current_time }}";
+        const partStr = document.getElementById('live-part').innerText || "{{ part_of_day }}";
+        const text = "Today is {{ day_name }}, {{ date_str }}. The time is " + timeStr + ", " + partStr + ". Up next: {{ next_task_label }}.";
+        speakText(text);
+        showToast("🔊 Reading orientation aloud...", "#2563EB");
+    }
+
+    // Modal Control
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function makeCall(name, number) {
+        speakText("Calling " + name + " now.");
+        showToast("📞 Calling " + name + " (" + number + ")...", "#1B7A3E");
+        setTimeout(() => {
+            closeModal('modal-call');
+        }, 2000);
+    }
+
+    // Auto-polling for active prompts
+    setInterval(() => {
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                if (data.active_prompt) {
+                    window.location.href = '/prompt/' + data.active_prompt.occ_id;
+                }
+            })
+            .catch(e => console.log(e));
+    }, 3000);
+</script>
+<style>
+    .screen-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 6px;
+    }
+
+    .home-top {
+        text-align: center;
+        margin-top: 8px;
+    }
+    .home-day {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1A202C;
+        margin-bottom: 2px;
+    }
+    .home-date {
+        font-size: 1.25rem;
+        color: #2D3748;
+        margin-bottom: 6px;
+    }
+    .home-clock {
+        font-size: 4.4rem;
+        font-weight: 800;
+        color: #1B2A38;
+        line-height: 1;
+        margin: 6px 0;
+        letter-spacing: -1.5px;
+    }
+    .home-part {
+        font-size: 1.25rem;
+        color: #718096;
+        font-weight: 500;
+    }
+
+    .home-next-box {
+        background-color: #F0F7FF;
+        border: 3px solid #3182CE;
+        border-radius: 18px;
+        padding: 18px 16px;
+        text-align: center;
+        margin: 18px 0;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
+    .home-next-box:hover {
+        transform: scale(1.02);
+    }
+    .home-next-label {
+        font-size: 1.05rem;
+        color: #718096;
+        margin-bottom: 4px;
+    }
+    .home-next-task {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #1A202C;
+    }
+
+    .home-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    .home-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .home-btn {
+        background-color: #FFFFFF;
+        border: 3px solid #1B2A38;
+        border-radius: 18px;
+        padding: 14px 8px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1A202C;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 58px;
+    }
+    .home-btn:hover {
+        background-color: #F7FAFC;
+    }
+    .home-btn-full {
+        width: 100%;
+    }
+
+    /* Schedule List in Modal */
+    .schedule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #E2E8F0;
+        font-size: 1.1rem;
+        text-align: left;
+    }
+    .badge-done { background: #E8F5E9; color: #2E7D32; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+    .badge-pending { background: #E3F2FD; color: #1565C0; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+    .badge-snoozed { background: #FFF8E1; color: #F57F17; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+    .badge-missed { background: #FFEBEE; color: #C62828; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="screen-title">A. Home screen</div>
+    
+    <div class="tablet-frame" id="frame-screen-a">
+        <!-- Top Date & Time Orientation -->
+        <div class="home-top">
+            <div class="home-day">{{ day_name }}</div>
+            <div class="home-date">{{ date_str }}</div>
+            <div class="home-clock" id="live-clock">{{ current_time }}</div>
+            <div class="home-part" id="live-part">{{ part_of_day }}</div>
+        </div>
+
+        <!-- Next Reminder Card -->
+        <div class="home-next-box" onclick="triggerPromptNow()" title="Click to test active prompt!">
+            <div class="home-next-label">Next:</div>
+            <div class="home-next-task">{{ next_task_label }}</div>
+        </div>
+
+        <!-- Interactive Buttons (Exact from Design) -->
+        <div class="home-actions">
+            <div class="home-row">
+                <button type="button" class="home-btn" onclick="openModal('modal-schedule')">My day</button>
+                <button type="button" class="home-btn" onclick="openModal('modal-call')">Call family</button>
+            </div>
+            <button type="button" class="home-btn home-btn-full" onclick="speakHome()" aria-label="Read orientation and next task aloud">
+                Read aloud
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: My Day Schedule -->
+<div id="modal-schedule" class="modal-overlay" onclick="if(event.target === this) closeModal('modal-schedule');">
+    <div class="modal-card">
+        <h2>📅 Today's Schedule</h2>
+        <div style="max-height: 320px; overflow-y: auto; margin-bottom: 20px;">
+            {% for item in day_schedule %}
+            <div class="schedule-item">
+                <div>
+                    <strong>{{ item.time }}</strong> — {{ item.label }}
+                </div>
+                <div>
+                    {% if item.status == 'done' %}
+                    <span class="badge-done">✓ Done</span>
+                    {% elif item.status == 'snoozed' %}
+                    <span class="badge-snoozed">⏰ Snoozed ({{ item.snoozes }})</span>
+                    {% elif item.status == 'missed' %}
+                    <span class="badge-missed">✕ Missed</span>
+                    {% else %}
+                    <span class="badge-pending">⏳ Upcoming</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p style="color: #666; padding: 20px;">No scheduled tasks for today.</p>
+            {% endfor %}
+        </div>
+        <button class="btn" style="background:#1B2A38; color:white; padding:12px 28px; border-radius:12px; font-size:1.1rem;" onclick="closeModal('modal-schedule')">
+            Close
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Call Family -->
+<div id="modal-call" class="modal-overlay" onclick="if(event.target === this) closeModal('modal-call');">
+    <div class="modal-card">
+        <h2>📞 Who would you like to call?</h2>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+            {% for contact in contacts %}
+            <button type="button" class="btn" style="background:{{ contact.avatar_color|default('#2563EB') }}; color:white; padding:16px; border-radius:16px; font-size:1.3rem; font-weight:bold;" onclick="makeCall('{{ contact.name }}', '{{ contact.phone }}')">
+                📞 {{ contact.name }}
+            </button>
+            {% else %}
+            <button type="button" class="btn" style="background:#2563EB; color:white; padding:16px; border-radius:16px; font-size:1.3rem; font-weight:bold;" onclick="makeCall('Sarah (Daughter)', '07123 456789')">
+                📞 Call Sarah (Daughter)
+            </button>
+            <button type="button" class="btn" style="background:#0D9488; color:white; padding:16px; border-radius:16px; font-size:1.3rem; font-weight:bold;" onclick="makeCall('Dr. Evans (GP)', '01234 567890')">
+                📞 Call Dr. Evans (GP)
+            </button>
+            {% endfor %}
+        </div>
+        <button class="btn" style="background:#CBD5E0; color:#1A202C; padding:10px 24px; border-radius:12px; font-size:1rem;" onclick="closeModal('modal-call')">
+            Cancel
+        </button>
+    </div>
+</div>
+{% endblock %}

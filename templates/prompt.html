@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}B. Reminder Prompt - Daily Living Assistant{% endblock %}
+
+{% block extra_head %}
+<script>
+    function speakPrompt() {
+        speakText("Time for {{ prompt_task }}. Please tap the big green Done button when you are finished.");
+    }
+
+    window.onload = function() {
+        speakPrompt();
+    };
+
+    function handleDoneClick(event) {
+        event.preventDefault();
+        playChime('done');
+        speakText("Well done! {{ prompt_task }} completed.");
+        document.getElementById('done-overlay').style.display = 'flex';
+
+        fetch('/api/confirm/{{ occ.occ_id if occ else 1 }}', {
+            method: 'POST',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).then(() => {
+            setTimeout(() => {
+                window.location.href = '/home';
+            }, 1600);
+        });
+    }
+
+    function handleSnoozeClick(event) {
+        event.preventDefault();
+        playChime('snooze');
+        speakText("Reminder snoozed for 10 minutes.");
+        showToast("⏰ Snoozed for 10 minutes", "#F59E0B");
+
+        fetch('/api/snooze/{{ occ.occ_id if occ else 1 }}', {
+            method: 'POST',
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).then(() => {
+            setTimeout(() => {
+                window.location.href = '/home';
+            }, 1200);
+        });
+    }
+</script>
+<style>
+    .screen-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 6px;
+    }
+
+    .prompt-top-time {
+        text-align: center;
+        font-size: 1.8rem;
+        color: #718096;
+        font-weight: 500;
+        margin-top: 10px;
+    }
+
+    .prompt-center {
+        text-align: center;
+        margin: auto 0;
+    }
+    .prompt-lead {
+        font-size: 1.7rem;
+        color: #2D3748;
+        margin-bottom: 6px;
+    }
+    .prompt-main-task {
+        font-size: 2.85rem;
+        font-weight: 800;
+        color: #1A202C;
+        line-height: 1.15;
+        margin-bottom: 12px;
+    }
+    .prompt-spoken-note {
+        font-size: 1.15rem;
+        font-style: italic;
+        color: #718096;
+        cursor: pointer;
+    }
+    .prompt-spoken-note:hover {
+        color: #2563EB;
+        text-decoration: underline;
+    }
+
+    .prompt-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    .btn-prompt-done {
+        background-color: #1B7A3E;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 18px;
+        font-size: 2.4rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        padding: 16px;
+        width: 100%;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 18px rgba(27, 122, 62, 0.28);
+    }
+    .btn-prompt-done:hover {
+        background-color: #166534;
+    }
+
+    .btn-prompt-snooze {
+        background-color: #FFFFFF;
+        color: #1A202C;
+        border: 3px solid #1B2A38;
+        border-radius: 18px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        padding: 14px;
+        width: 100%;
+        min-height: 68px;
+        line-height: 1.25;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-prompt-snooze:hover {
+        background-color: #F7FAFC;
+    }
+
+    .prompt-footer-note {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #718096;
+        margin-top: 10px;
+    }
+
+    /* Celebration Overlay on Done */
+    .done-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(27, 122, 62, 0.95);
+        color: white;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        border-radius: 32px;
+        text-align: center;
+        padding: 24px;
+    }
+    .done-checkmark {
+        font-size: 5rem;
+        margin-bottom: 16px;
+    }
+    .done-text {
+        font-size: 2.2rem;
+        font-weight: 800;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="screen-title">B. Reminder prompt</div>
+    
+    <div class="tablet-frame" id="frame-screen-b">
+        <!-- Celebration Overlay -->
+        <div id="done-overlay" class="done-overlay">
+            <div class="done-checkmark">✓</div>
+            <div class="done-text">Well Done!</div>
+            <p style="font-size: 1.2rem; margin-top: 8px;">Activity logged successfully.</p>
+        </div>
+
+        <!-- Top Scheduled Time -->
+        <div class="prompt-top-time">{{ prompt_time }}</div>
+
+        <!-- Center Prompt Statement -->
+        <div class="prompt-center">
+            <div class="prompt-lead">Time for</div>
+            <div class="prompt-main-task">{{ prompt_task }}</div>
+            <div class="prompt-spoken-note" onclick="speakPrompt()" title="Click to hear again">
+                🔊 (spoken aloud as well)
+            </div>
+        </div>
+
+        <!-- Bottom Primary & Secondary Actions -->
+        <div class="prompt-actions">
+            <form onsubmit="handleDoneClick(event)">
+                <button type="submit" class="btn btn-prompt-done" aria-label="Confirm task done">
+                    DONE
+                </button>
+            </form>
+
+            {% if can_snooze %}
+            <form onsubmit="handleSnoozeClick(event)">
+                <button type="submit" class="btn btn-prompt-snooze" aria-label="Remind me in 10 minutes">
+                    Remind me<br>in 10 minutes
+                </button>
+            </form>
+            <div class="prompt-footer-note">
+                Snooze {{ snooze_count + 1 }} of {{ max_snoozes }} (hides after {{ max_snoozes }} uses)
+            </div>
+            {% else %}
+            <div class="btn-prompt-snooze" style="opacity: 0.55; background: #EDF2F7; cursor: not-allowed; border-color:#A0AEC0;">
+                Snooze limit reached
+            </div>
+            <div class="prompt-footer-note" style="color: #E53E3E; font-weight: bold;">
+                Snooze hidden (maximum {{ max_snoozes }} uses reached)
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

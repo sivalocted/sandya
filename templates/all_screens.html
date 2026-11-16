@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figure A2.1 Live Interactive Prototype - All 3 Screens</title>
+    <style>
+        :root {
+            --frame-border: #1B2A38;
+            --text-dark: #1A202C;
+            --text-muted: #718096;
+            --blue-accent: #2563EB;
+            --blue-border: #3182CE;
+            --blue-bg: #F0F7FF;
+            --green-done: #1B7A3E;
+            --green-done-hover: #166534;
+            --border-gray: #CBD5E0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        /* Top Simulation Bar */
+        .demo-bar {
+            width: 100%;
+            max-width: 1200px;
+            background: #1E293B;
+            color: #FFFFFF;
+            padding: 10px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .demo-bar-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .demo-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-demo {
+            background: #3B82F6;
+            color: #FFFFFF;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-demo:hover { background: #2563EB; }
+        .btn-demo-orange { background: #F59E0B; }
+        .btn-demo-orange:hover { background: #D97706; }
+        .btn-demo-red { background: #EF4444; }
+        .btn-demo-red:hover { background: #DC2626; }
+
+        .showcase-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+            max-width: 1280px;
+            flex-wrap: wrap;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .column-title {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: -0.3px;
+        }
+
+        /* Tablet Frame */
+        .tablet-frame {
+            width: 360px;
+            height: 640px;
+            background-color: #FFFFFF;
+            border: 4px solid var(--frame-border);
+            border-radius: 36px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button, .btn {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.08s ease, background-color 0.15s ease;
+        }
+        button:active, .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Screen A Specifics */
+        .home-top {
+            text-align: center;
+            margin-top: 6px;
+        }
+        .home-day {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-bottom: 2px;
+        }
+        .home-date {
+            font-size: 1.25rem;
+            color: #2D3748;
+            margin-bottom: 8px;
+        }
+        .home-clock {
+            font-size: 4.6rem;
+            font-weight: 800;
+            color: #1B2A38;
+            line-height: 1;
+            margin: 6px 0;
+            letter-spacing: -1.5px;
+        }
+        .home-part {
+            font-size: 1.25rem;
+            color: #718096;
+            font-weight: 500;
+        }
+        .home-next-box {
+            background-color: #F0F7FF;
+            border: 3px solid #3182CE;
+            border-radius: 18px;
+            padding: 18px 16px;
+            text-align: center;
+            margin: 18px 0;
+            cursor: pointer;
+        }
+        .home-next-label {
+            font-size: 1.05rem;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+        .home-next-task {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #1A202C;
+        }
+        .home-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .home-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .home-btn {
+            background-color: #FFFFFF;
+            border: 3px solid #1B2A38;
+            border-radius: 18px;
+            padding: 14px 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1A202C;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 58px;
+        }
+        .home-btn:hover {
+            background-color: #F7FAFC;
+        }
+        .home-btn-full {
+            width: 100%;
+        }
+
+        /* Screen B Specifics */
+        .prompt-top-time {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #718096;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .prompt-center {
+            text-align: center;
+            margin: auto 0;
+        }
+        .prompt-lead {
+            font-size: 1.7rem;
+            color: #2D3748;
+            margin-bottom: 6px;
+        }
+        .prompt-main-task {
+            font-size: 2.85rem;
+            font-weight: 800;
+            color: #1A202C;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        .prompt-spoken-note {
+            font-size: 1.15rem;
+            font-style: italic;
+            color: #718096;
+            cursor: pointer;
+        }
+        .prompt-spoken-note:hover {
+            color: #2563EB;
+        }
+        .prompt-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .btn-prompt-done {
+            background-color: #1B7A3E;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 18px;
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 16px;
+            width: 100%;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(27, 122, 62, 0.25);
+        }
+        .btn-prompt-done:hover {
+            background-color: #166534;
+        }
+        .btn-prompt-snooze {
+            background-color: #FFFFFF;
+            color: #1A202C;
+            border: 3px solid #1B2A38;
+            border-radius: 18px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 14px;
+            width: 100%;
+            min-height: 68px;
+            line-height: 1.25;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-prompt-snooze:hover {
+            background-color: #F7FAFC;
+        }
+        .prompt-footer-note {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        /* Screen C Specifics */
+        .caregiver-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #1A202C;
+            margin-top: 6px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-label {
+            display: block;
+            font-size: 1.05rem;
+            color: #718096;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-input {
+            width: 100%;
+            border: 2px solid #CBD5E0;
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-size: 1.15rem;
+            color: #1A202C;
+            font-family: inherit;
+            outline: none;
+            background: #FFFFFF;
+        }
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 24px 0;
+            cursor: pointer;
+        }
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background-color: #2563EB;
+            border-radius: 14px;
+            position: relative;
+            flex-shrink: 0;
+            transition: background-color 0.15s ease;
+        }
+        .toggle-knob {
+            width: 22px;
+            height: 22px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            right: 3px;
+        }
+        .toggle-label {
+            font-size: 0.98rem;
+            color: #2D3748;
+            line-height: 1.3;
+        }
+        .btn-save {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 18px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 14px;
+            width: 100%;
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+        }
+        .btn-save:hover {
+            background-color: #1D4ED8;
+        }
+
+        /* Done Animation Overlay */
+        .done-anim {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(27, 122, 62, 0.95);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 32px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1B7A3E;
+            color: #FFFFFF;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: none;
+        }
+    </style>
+    <script>
+        function playChime(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'done') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.4);
+                    });
+                } else if (type === 'snooze') {
+                    [440, 392].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.15);
+                        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.15);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.15 + 0.35);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.15);
+                        osc.stop(ctx.currentTime + idx * 0.15 + 0.35);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.9;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function showToast(msg, bg) {
+            const toast = document.getElementById('app-toast');
+            if (toast) {
+                toast.innerText = msg;
+                toast.style.background = bg || '#1B7A3E';
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3500);
+            }
+        }
+
+        // Screen A Actions
+        function speakScreenA() {
+            speakText("Today is Monday, 16 November 2026. The time is 12:30, Afternoon. Up next: Have your lunch.");
+            showToast("🔊 Reading orientation aloud...", "#2563EB");
+        }
+
+        function triggerCallFamily() {
+            speakText("Calling Sarah, your family caregiver now.");
+            showToast("📞 Calling Sarah (Daughter)...", "#1B7A3E");
+        }
+
+        function triggerMyDay() {
+            speakText("Your schedule for today: 08:30 Breakfast, Completed. 12:30 Lunch, Due now. 15:30 Afternoon walk. 20:00 Evening tablet.");
+            showToast("📅 Opening today's schedule...", "#1E293B");
+        }
+
+        // Screen B Actions
+        function triggerDone() {
+            playChime('done');
+            speakText("Well done! Lunch completed.");
+            const overlay = document.getElementById('done-anim-b');
+            if (overlay) overlay.style.display = 'flex';
+            showToast("✓ DONE: Have your lunch confirmed!", "#1B7A3E");
+
+            fetch('/confirm-action', { method: 'POST', headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(() => {
+                    setTimeout(() => {
+                        if (overlay) overlay.style.display = 'none';
+                    }, 2200);
+                });
+        }
+
+        let snoozeCount = 0;
+        function triggerSnooze() {
+            playChime('snooze');
+            snoozeCount++;
+            if (snoozeCount <= 2) {
+                speakText("Reminder snoozed for 10 minutes. Snooze " + snoozeCount + " of 2.");
+                showToast("⏰ Snoozed for 10 minutes (" + snoozeCount + "/2)", "#F59E0B");
+                document.getElementById('snooze-note').innerText = "Snooze " + snoozeCount + " of 2 used";
+            } else {
+                speakText("Snooze limit reached. Please tap Done.");
+                showToast("🚫 Snooze limit reached (2/2)", "#EF4444");
+                document.getElementById('btn-snooze-b').style.opacity = '0.5';
+                document.getElementById('btn-snooze-b').style.cursor = 'not-allowed';
+                document.getElementById('snooze-note').innerText = "Snooze limit reached (hidden)";
+            }
+        }
+
+        // Screen C Actions
+        function toggleCaregiverSwitch() {
+            const sw = document.getElementById('switch-c');
+            if (sw.style.backgroundColor === 'rgb(203, 213, 224)') {
+                sw.style.backgroundColor = '#2563EB';
+                sw.querySelector('.toggle-knob').style.left = 'auto';
+                sw.querySelector('.toggle-knob').style.right = '3px';
+                showToast("✓ Caregiver escalation opt-in enabled", "#2563EB");
+            } else {
+                sw.style.backgroundColor = '#CBD5E0';
+                sw.querySelector('.toggle-knob').style.right = 'auto';
+                sw.querySelector('.toggle-knob').style.left = '3px';
+                showToast("Caregiver escalation turned off", "#64748B");
+            }
+        }
+
+        function triggerSaveRoutine() {
+            playChime('done');
+            speakText("New reminder saved: Have your lunch at 12:30.");
+            showToast("💾 Routine saved & scheduled successfully!", "#2563EB");
+        }
+    </script>
+</head>
+<body>
+    <!-- Live Demo Toolbar -->
+    <div class="demo-bar">
+        <div class="demo-bar-title">
+            <span>⚡ Interactive Control Panel:</span>
+        </div>
+        <div class="demo-actions">
+            <button class="btn-demo" onclick="triggerDone()">✓ Tap DONE</button>
+            <button class="btn-demo btn-demo-orange" onclick="triggerSnooze()">⏰ Tap Snooze</button>
+            <button class="btn-demo" onclick="speakScreenA()">🔊 Read Aloud</button>
+            <button class="btn-demo btn-demo-red" onclick="fetch('/api/simulate-miss', {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()).then(d=>{showToast(d.message, '#DC2626'); speakText(d.message);});">⚠️ Simulate Miss</button>
+            <a href="{{ url_for('home') }}" class="btn-demo" style="background:#475569;">🏠 Patient View</a>
+            <a href="{{ url_for('caregiver_portal') }}" class="btn-demo" style="background:#475569;">⚙️ Caregiver View</a>
+        </div>
+    </div>
+
+    <div class="showcase-container" id="showcase">
+        <!-- COLUMN A: HOME SCREEN -->
+        <div class="column">
+            <div class="column-title">A. Home screen</div>
+            <div class="tablet-frame">
+                <div class="home-top">
+                    <div class="home-day">Monday</div>
+                    <div class="home-date">16 November 2026</div>
+                    <div class="home-clock">12:30</div>
+                    <div class="home-part">Afternoon</div>
+                </div>
+
+                <div class="home-next-box" onclick="triggerDone()" title="Click to interact!">
+                    <div class="home-next-label">Next:</div>
+                    <div class="home-next-task">Have your lunch</div>
+                </div>
+
+                <div class="home-actions">
+                    <div class="home-row">
+                        <button type="button" class="home-btn" onclick="triggerMyDay()">My day</button>
+                        <button type="button" class="home-btn" onclick="triggerCallFamily()">Call family</button>
+                    </div>
+                    <button type="button" class="home-btn home-btn-full" onclick="speakScreenA()">
+                        Read aloud
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN B: REMINDER PROMPT -->
+        <div class="column">
+            <div class="column-title">B. Reminder prompt</div>
+            <div class="tablet-frame">
+                <!-- Done Animation -->
+                <div id="done-anim-b" class="done-anim">
+                    <div style="font-size: 5rem; margin-bottom: 12px;">✓</div>
+                    <div style="font-size: 2.2rem; font-weight: 800;">Well Done!</div>
+                    <p style="font-size: 1.1rem; margin-top: 6px;">Lunch completed & logged.</p>
+                </div>
+
+                <div class="prompt-top-time">12:30</div>
+
+                <div class="prompt-center">
+                    <div class="prompt-lead">Time for</div>
+                    <div class="prompt-main-task">your lunch</div>
+                    <div class="prompt-spoken-note" onclick="speakText('Time for your lunch. Please tap the big green Done button when you are finished.')" title="Click to hear speech">
+                        🔊 (spoken aloud as well)
+                    </div>
+                </div>
+
+                <div class="prompt-actions">
+                    <button type="button" class="btn btn-prompt-done" onclick="triggerDone()">
+                        DONE
+                    </button>
+                    <button type="button" id="btn-snooze-b" class="btn btn-prompt-snooze" onclick="triggerSnooze()">
+                        Remind me<br>in 10 minutes
+                    </button>
+                    <div class="prompt-footer-note" id="snooze-note">
+                        Snooze hides after 2 uses
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN C: CAREGIVER SETUP -->
+        <div class="column">
+            <div class="column-title">C. Caregiver setup</div>
+            <div class="tablet-frame">
+                <div>
+                    <div class="caregiver-title">New reminder</div>
+
+                    <div class="form-group">
+                        <div class="form-label">What should it say?</div>
+                        <input type="text" class="form-input" id="cfg-label" value="Have your lunch">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">Time</div>
+                        <input type="text" class="form-input" id="cfg-time" value="12:30">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">Days</div>
+                        <input type="text" class="form-input" id="cfg-days" value="Every day">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-label">Snooze</div>
+                        <input type="text" class="form-input" id="cfg-snooze" value="10 min, max 2 times">
+                    </div>
+
+                    <div class="toggle-row" onclick="toggleCaregiverSwitch()">
+                        <div class="toggle-switch" id="switch-c">
+                            <div class="toggle-knob"></div>
+                        </div>
+                        <div class="toggle-label">
+                            Alert me if missed twice<br>(opt-in)
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-save" onclick="triggerSaveRoutine()">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-toast" class="toast"></div>
+</body>
+</html>
